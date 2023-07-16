@@ -6,11 +6,13 @@ const ErrorOverlayPlugin = require('error-overlay-webpack-plugin');
 
 const port = 3000;
 let publicUrl = `ws://localhost:${port}/ws`;
+
 //only for gitpod
 if(process.env.GITPOD_WORKSPACE_URL){
   const [schema, host] = process.env.GITPOD_WORKSPACE_URL.split('://');
   publicUrl = `wss://${port}-${host}/ws`;
 }
+
 //only for codespaces
 if(process.env.CODESPACE_NAME){
   publicUrl = `wss://${process.env.CODESPACE_NAME}-${port}.preview.app.github.dev/ws`;
@@ -33,23 +35,35 @@ module.exports = {
           use: ['babel-loader']
         },
         {
-          test: /\.(css)$/, use: [{
-              loader: "style-loader" // creates style nodes from JS strings
-          }, {
-              loader: "css-loader" // translates CSS into CommonJS
-          }]
+          test: /\.css$/, 
+          use: [
+              'style-loader', // creates style nodes from JS strings
+              'css-loader'    // translates CSS into CommonJS
+          ]
         }, //css only files
+        {
+          test: /\.scss$/,
+          use: [
+            'style-loader',  // 3. Inject styles into DOM
+            'css-loader',    // 2. Turns css into commonjs
+            'sass-loader'    // 1. Turns sass into css
+          ]
+        }, //scss files
         { 
-          test: /\.(png|svg|jpg|gif)$/, use: {
+          test: /\.(png|svg|jpg|gif)$/, 
+          use: {
             loader: 'file-loader',
             options: { name: '[name].[ext]' } 
           }
         }, //for images
-        { test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/, use: ['file-loader'] } //for fonts
+        { 
+          test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/, 
+          use: ['file-loader'] 
+        } //for fonts
     ]
   },
   resolve: {
-    extensions: ['*', '.js', '.jsx']
+    extensions: ['*', '.js', '.jsx', '.scss']
   },
   devtool: "source-map",
   devServer: {
@@ -66,9 +80,6 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    // new ESLintPlugin({
-    //   files: path.resolve(__dirname, "src"),
-    // }),
     new HtmlWebpackPlugin({
         favicon: '4geeks.ico',
         template: 'template.html'
